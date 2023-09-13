@@ -16,7 +16,7 @@ class PyPsyclone(PythonPackage):
     git = "https://github.com/stfc/PSyclone.git"
 
     version("develop", branch="master")
-    version("2.3.1", commit="79926126eefc6e464fe8724a398e3329f7d4f4c8")
+    version("2.3.1", sha256="5c4f28087ca76b0ccf37ac3d5e5734abad064e32a268ca2910aacfd537e586c4")
     version("1.5.1", commit="eba7a097175b02f75dec70616cf267b7b3170d78")
 
     depends_on("py-setuptools", type="build")

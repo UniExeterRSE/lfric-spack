@@ -45,6 +45,7 @@ class Lfric(MakefilePackage):
 
     depends_on("yaxt")
     depends_on("xios@2.5")
+    depends_on("pfunit@3.2.9")
     depends_on("py-jinja2")
     depends_on("py-psyclone@2.3.1")
     depends_on("rose-picker")
@@ -62,11 +63,14 @@ class Lfric(MakefilePackage):
         env.set("FPP", "cpp -traditional-cpp")
         env.set("LDMPI", self.spec["mpi"].mpifc)
 
+        env.set("FC", "gfortran")
+        env.set("FFLAGS", "-I$SPACK_ENV/.spack-env/view/include -I$SPACK_ENV/.spack-env/view/lib")
+        env.set("LDFLAGS", "-L$SPACK_ENV/.spack-env/view/lib")
 
-    build_directory = "gungho" # FIXME
+    build_directory = "infrastructure" # FIXME
     def build(self, spec, prefix):
         with working_dir(self.build_directory):
-            make("build")
+            make("clean")
 
     def install(self, spec, prefix):
         with working_dir(self.build_directory):

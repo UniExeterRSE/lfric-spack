@@ -50,7 +50,13 @@ class Xios(Package):
     # TODO: replace this with an explicit list of components of Boost,
     # for instance depends_on('boost +filesystem')
     # See https://github.com/spack/spack/pull/22303 for reference
-    depends_on(Boost.with_default_variants)
+
+    # #27769: On M1/MacOS/Arm, need to use Boost version 1.82 or higher:
+    if platform.machine() in ["arm64", "aarch64"]:
+        depends_on("boost@1.82:", type="build")
+    else:
+        depends_on(Boost.with_default_variants)
+
     #depends_on("blitz")
     depends_on("perl", type="build")
     depends_on("perl-uri", type="build")
