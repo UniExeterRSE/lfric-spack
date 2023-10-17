@@ -45,7 +45,7 @@ class Lfric(MakefilePackage):
 
     depends_on("yaxt")
     depends_on("xios@2.5")
-    depends_on("pfunit@3.2.9")
+    #depends_on("pfunit@3.2.9")
     depends_on("py-jinja2")
     depends_on("py-psyclone@2.3.1")
     depends_on("rose-picker")
@@ -62,15 +62,29 @@ class Lfric(MakefilePackage):
         env.set("LFRIC_TARGET_PLATFORM", "meto-xc40")
         env.set("FPP", "cpp -traditional-cpp")
         env.set("LDMPI", self.spec["mpi"].mpifc)
+        env.set("FC", self.compiler.fc)
 
-        env.set("FC", "gfortran")
-        env.set("FFLAGS", "-I$SPACK_ENV/.spack-env/view/include -I$SPACK_ENV/.spack-env/view/lib")
-        env.set("LDFLAGS", "-L$SPACK_ENV/.spack-env/view/lib")
+        if spack.environment.active_environment() != None:
+            env.set("FFLAGS", "-I$SPACK_ENV/.spack-env/view/include -I$SPACK_ENV/.spack-env/view/lib")
+            env.set("LDFLAGS", "-L$SPACK_ENV/.spack-env/view/lib")
 
-    build_directory = "infrastructure" # FIXME
+
+    def setup_run_environment(self, env):
+        env.set("LFRIC_TARGET_PLATFORM", "meto-xc40")
+        env.set("FPP", "cpp -traditional-cpp")
+        # Change below if mpi=cray-mpich
+        env.set("LDMPI", self.spec["mpi"].mpifc)
+        env.set("FC", self.compiler.fc)
+
+        if spack.environment.active_environment() != None:
+            env.set("FFLAGS", "-I$SPACK_ENV/.spack-env/view/include -I$SPACK_ENV/.spack-env/view/lib")
+            env.set("LDFLAGS", "-L$SPACK_ENV/.spack-env/view/lib")
+            env.set("LD_LIBRARY_PATH", "-L$SPACK_ENV/.spack-env/view/lib")
+
+    build_directory = "gungho" # FIXME
     def build(self, spec, prefix):
         with working_dir(self.build_directory):
-            make("clean")
+            make("build")
 
     def install(self, spec, prefix):
         with working_dir(self.build_directory):
