@@ -7,6 +7,7 @@ import os
 
 from spack.package import *
 from spack.pkg.builtin.boost import Boost
+import platform
 
 
 class Xios(Package):
