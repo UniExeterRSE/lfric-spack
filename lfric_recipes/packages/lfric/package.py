@@ -20,6 +20,8 @@
 # See the Spack documentation for more information on packaging.
 # ----------------------------------------------------------------------------
 
+import sys
+import os
 from spack.package import *
 
 
@@ -40,12 +42,17 @@ class Lfric(MakefilePackage):
     # FIXME: Restrict versions
     depends_on("mpi")
     depends_on("hdf5+mpi")
-    depends_on("netcdf-c+mpi")
+    # NetCDF seemingly needs to be built with --enable_dap for MacOS - it is
+    # recommended not to use external curl, as spack has issues finding libs
+    if sys.platform == 'darwin':
+        depends_on("netcdf-c+mpi+dap")
+    else:
+        depends_on("netcdf-c+mpi")
     depends_on("netcdf-fortran ^netcdf-c+mpi")
 
     depends_on("yaxt")
     depends_on("xios@2.5")
-    #depends_on("pfunit@3.2.9")
+    depends_on("pfunit")
     depends_on("py-jinja2")
     depends_on("py-psyclone@2.3.1")
     depends_on("rose-picker")
@@ -65,8 +72,10 @@ class Lfric(MakefilePackage):
         env.set("FC", self.compiler.fc)
 
         if spack.environment.active_environment() != None:
-            env.set("FFLAGS", "-I$SPACK_ENV/.spack-env/view/include -I$SPACK_ENV/.spack-env/view/lib")
-            env.set("LDFLAGS", "-L$SPACK_ENV/.spack-env/view/lib")
+            spackenv = os.environ.get('SPACK_ENV')
+            env.set("FFLAGS", f"-I{spackenv}/.spack-env/view/include -I{spackenv}/.spack-env/view/lib")
+            env.set("LDFLAGS", f"-L{spackenv}/.spack-env/view/lib")
+            env.set("PSYCLONE_CONFIG", os.path.join(self.spec['py-psyclone'].prefix.share, "psyclone/psyclone.cfg"))
 
 
     def setup_run_environment(self, env):
@@ -77,14 +86,16 @@ class Lfric(MakefilePackage):
         env.set("FC", self.compiler.fc)
 
         if spack.environment.active_environment() != None:
-            env.set("FFLAGS", "-I$SPACK_ENV/.spack-env/view/include -I$SPACK_ENV/.spack-env/view/lib")
-            env.set("LDFLAGS", "-L$SPACK_ENV/.spack-env/view/lib")
-            env.set("LD_LIBRARY_PATH", "-L$SPACK_ENV/.spack-env/view/lib")
+            spackenv = os.environ.get('SPACK_ENV')
+            env.set("FFLAGS", f"-I{spackenv}/.spack-env/view/include -I{spackenv}/.spack-env/view/lib")
+            env.set("LDFLAGS", f"-L{spackenv}/.spack-env/view/lib")
+            env.set("LD_LIBRARY_PATH", f"-L{spackenv}/.spack-env/view/lib")
+            env.set("PSYCLONE_CONFIG", os.path.join(self.spec['py-psyclone'].prefix.share, "psyclone/psyclone.cfg"))
 
-    build_directory = "gungho" # FIXME
+    build_directory = "infrastructure" # FIXME
     def build(self, spec, prefix):
         with working_dir(self.build_directory):
-            make("build")
+            make("unit-tests")
 
     def install(self, spec, prefix):
         with working_dir(self.build_directory):
