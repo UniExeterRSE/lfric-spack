@@ -1,4 +1,4 @@
-# MOAP
+# Building LFRic with Spack
 
 ## Spack Setup
 

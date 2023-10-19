@@ -26,7 +26,10 @@ from spack.package import *
 
 
 class Lfric(MakefilePackage):
-    """FIXME: Put a proper description of your package here."""
+    """The LFRic project aims to develop a software infrastructure primarily to
+    support the development of a replacement for the UK Met Office's Unified
+    Model but also to provide a common library that underpins a range of
+    modelling requirments and related tools."""
 
     homepage = "https://code.metoffice.gov.uk/trac/lfric"
     svn = "https://code.metoffice.gov.uk/svn/lfric/LFRic/trunk"
@@ -38,10 +41,12 @@ class Lfric(MakefilePackage):
     # FIXME: Add proper versions and checksums here.
     version("r39162", revision=39162)
 
-    # FIXME: Add dependencies if required.
+    # FIXME: Add variants for different installation types
+
     # FIXME: Restrict versions
     depends_on("mpi")
     depends_on("hdf5+mpi")
+
     # NetCDF seemingly needs to be built with --enable_dap for MacOS - it is
     # recommended not to use external curl, as spack has issues finding libs
     if sys.platform == 'darwin':
@@ -65,20 +70,7 @@ class Lfric(MakefilePackage):
     patch("ifort.mk.patch", when="%intel")
 
 
-    def setup_build_environment(self, env):
-        env.set("LFRIC_TARGET_PLATFORM", "meto-xc40")
-        env.set("FPP", "cpp -traditional-cpp")
-        env.set("LDMPI", self.spec["mpi"].mpifc)
-        env.set("FC", self.compiler.fc)
-
-        if spack.environment.active_environment() != None:
-            spackenv = os.environ.get('SPACK_ENV')
-            env.set("FFLAGS", f"-I{spackenv}/.spack-env/view/include -I{spackenv}/.spack-env/view/lib")
-            env.set("LDFLAGS", f"-L{spackenv}/.spack-env/view/lib")
-            env.set("PSYCLONE_CONFIG", os.path.join(self.spec['py-psyclone'].prefix.share, "psyclone/psyclone.cfg"))
-
-
-    def setup_run_environment(self, env):
+    def setup_lfric_env(self, env):
         env.set("LFRIC_TARGET_PLATFORM", "meto-xc40")
         env.set("FPP", "cpp -traditional-cpp")
         # Change below if mpi=cray-mpich
@@ -91,6 +83,15 @@ class Lfric(MakefilePackage):
             env.set("LDFLAGS", f"-L{spackenv}/.spack-env/view/lib")
             env.set("LD_LIBRARY_PATH", f"-L{spackenv}/.spack-env/view/lib")
             env.set("PSYCLONE_CONFIG", os.path.join(self.spec['py-psyclone'].prefix.share, "psyclone/psyclone.cfg"))
+
+
+    def setup_build_environment(self, env):
+        self.setup_lfric_env(env)
+
+
+    def setup_run_environment(self, env):
+        self.setup_lfric_env(env)
+
 
     build_directory = "infrastructure" # FIXME
     def build(self, spec, prefix):
