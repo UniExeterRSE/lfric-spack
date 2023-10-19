@@ -115,12 +115,13 @@ class Lfric(MakefilePackage):
         self.setup_lfric_env(env)
 
 
-    build_directory = "mesh_tools" # FIXME
+    build_directory = "infrastructure" # FIXME
     def build(self, spec, prefix):
         with working_dir(self.build_directory):
-            make("build")
+            make("unit-tests")
 
     def install(self, spec, prefix):
-        with working_dir(self.build_directory):
-            install_tree("bin/", prefix.bin)
+        pass
+        #with working_dir(self.build_directory):
+            #install_tree("bin/", prefix.bin)
             
