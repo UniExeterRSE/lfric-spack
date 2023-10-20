@@ -71,18 +71,40 @@ class Lfric(MakefilePackage):
 
 
     def setup_lfric_env(self, env):
-        env.set("LFRIC_TARGET_PLATFORM", "meto-xc40")
-        env.set("FPP", "cpp -traditional-cpp")
-        # Change below if mpi=cray-mpich
-        env.set("LDMPI", self.spec["mpi"].mpifc)
         env.set("FC", self.compiler.fc)
+        env.set("FPP", "cpp -traditional-cpp")
+        env.set("LFRIC_TARGET_PLATFORM", "meto-xc40")
 
-        if spack.environment.active_environment() != None:
-            spackenv = os.environ.get('SPACK_ENV')
-            env.set("FFLAGS", f"-I{spackenv}/.spack-env/view/include -I{spackenv}/.spack-env/view/lib")
-            env.set("LDFLAGS", f"-L{spackenv}/.spack-env/view/lib")
-            env.set("LD_LIBRARY_PATH", f"-L{spackenv}/.spack-env/view/lib")
-            env.set("PSYCLONE_CONFIG", os.path.join(self.spec['py-psyclone'].prefix.share, "psyclone/psyclone.cfg"))
+        # Use compiler to link for MPI variants which dont include an MPI
+        # compiler wrapper
+        if self.spec['mpi'].satisfies("cray-mpich"):
+            env.set("LDMPI", self.compiler.fc)
+        else:
+            env.set("LDMPI", self.spec['mpi'].mpifc)
+
+        env.set("FFLAGS", f"-I{self.spec['mpi'].prefix}/lib -I{self.spec['mpi'].prefix}/include \
+                            -I{self.spec['netcdf-fortran'].prefix}/include \
+                            -I{self.spec['yaxt'].prefix}/include \
+                            -I{self.spec['xios'].prefix}/include \
+                            -I{self.spec['pfunit'].prefix}/include")
+
+        env.set("LDFLAGS", f"-L{self.spec['mpi'].prefix}/lib \
+                             -L{self.spec['hdf5'].prefix}/lib \
+                             -L{self.spec['netcdf-c'].prefix}/lib \
+                             -L{self.spec['netcdf-fortran'].prefix}/lib \
+                             -L{self.spec['yaxt'].prefix}/lib \
+                             -L{self.spec['xios'].prefix}/lib \
+                             -L{self.spec['pfunit'].prefix}/lib")
+
+        env.set("LD_LIBRARY_PATH", f"{self.spec['mpi'].prefix}/lib \
+                                     {self.spec['hdf5'].prefix}/lib \
+                                     {self.spec['netcdf-c'].prefix}/lib \
+                                     {self.spec['netcdf-fortran'].prefix}/lib \
+                                     {self.spec['yaxt'].prefix}/lib \
+                                     {self.spec['xios'].prefix}/lib \
+                                     {self.spec['pfunit'].prefix}/lib")
+
+        env.set("PSYCLONE_CONFIG", os.path.join(self.spec['py-psyclone'].prefix.share, "psyclone/psyclone.cfg"))
 
 
     def setup_build_environment(self, env):
@@ -99,6 +121,7 @@ class Lfric(MakefilePackage):
             make("unit-tests")
 
     def install(self, spec, prefix):
-        with working_dir(self.build_directory):
-            install_tree("bin/", prefix.bin)
+        pass
+        #with working_dir(self.build_directory):
+            #install_tree("bin/", prefix.bin)
             
