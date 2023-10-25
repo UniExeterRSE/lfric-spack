@@ -105,6 +105,7 @@ class Lfric(MakefilePackage):
                                      {self.spec['pfunit'].prefix}/lib")
 
         env.set("PSYCLONE_CONFIG", os.path.join(self.spec['py-psyclone'].prefix.share, "psyclone/psyclone.cfg"))
+        env.set("PYTHONPATH", f"{self.spec['rose-picker'].prefix}/lib/python3.11/site-packages")
 
 
     def setup_build_environment(self, env):
@@ -115,13 +116,12 @@ class Lfric(MakefilePackage):
         self.setup_lfric_env(env)
 
 
-    build_directory = "infrastructure" # FIXME
+    build_directory = "miniapps/skeleton" # FIXME
     def build(self, spec, prefix):
         with working_dir(self.build_directory):
-            make("unit-tests")
+            make("build")
 
     def install(self, spec, prefix):
-        pass
-        #with working_dir(self.build_directory):
-            #install_tree("bin/", prefix.bin)
+        with working_dir(self.build_directory):
+            install_tree("bin/", prefix.bin)
             
