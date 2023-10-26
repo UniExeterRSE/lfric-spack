@@ -105,8 +105,7 @@ class Lfric(MakefilePackage):
                                      {self.spec['pfunit'].prefix}/lib")
 
         env.set("PSYCLONE_CONFIG", os.path.join(self.spec['py-psyclone'].prefix.share, "psyclone/psyclone.cfg"))
-        env.set("PYTHONPATH", f"{self.spec['rose-picker'].prefix}/lib/python3.11/site-packages")
-
+        
 
     def setup_build_environment(self, env):
         self.setup_lfric_env(env)
