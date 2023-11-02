@@ -41,7 +41,13 @@ class Lfric(MakefilePackage):
     # FIXME: Add proper versions and checksums here.
     version("r39162", revision=39162)
 
-    # FIXME: Add variants for different installation types
+    # Variants corresponding to different LFRic apps
+    variant("infrastructure", default=True, description="Builds the LFRic infrastructure as a library")
+    variant("mesh_tools", default=True, description="Builds the LFRic mesh infrastructure")
+    variant("gungho", default=False, description="Builds the GungHo dynamical core as a library")
+    variant("skeleton", default=False, description="Builds the LFRic skeleton miniapp")
+    variant("gungho_dev", default=False, description="Builds the LFRic GungHo development application")
+    variant("lfric_atm", default=False, description="Builds the LFRic atmospheric model application")
 
     # FIXME: Restrict versions
     depends_on("mpi")
@@ -71,6 +77,7 @@ class Lfric(MakefilePackage):
 
 
     def setup_lfric_env(self, env):
+
         env.set("FC", self.compiler.fc)
         env.set("FPP", "cpp -traditional-cpp")
         env.set("LFRIC_TARGET_PLATFORM", "meto-xc40")
@@ -105,7 +112,7 @@ class Lfric(MakefilePackage):
                                      {self.spec['pfunit'].prefix}/lib")
 
         env.set("PSYCLONE_CONFIG", os.path.join(self.spec['py-psyclone'].prefix.share, "psyclone/psyclone.cfg"))
-        
+
 
     def setup_build_environment(self, env):
         self.setup_lfric_env(env)
@@ -115,12 +122,38 @@ class Lfric(MakefilePackage):
         self.setup_lfric_env(env)
 
 
-    build_directory = "miniapps/skeleton" # FIXME
+    def setup_build_parameters(self):
+        self.build_parameters = []
+        if self.spec.satisfies("+infrastructure"):
+            self.build_parameters.append({'build_dir': "infrastructure",
+                                          'target_dirs': ["lib"]})
+        if self.spec.satisfies("+mesh_tools"):
+            self.build_parameters.append({'build_dir': "mesh_tools",
+                                          'target_dirs': ["bin"]})
+        if self.spec.satisfies("+gungho"):
+            self.build_parameters.append({'build_dir': "gungho",
+                                          'target_dirs': ["lib"]})
+
+        if self.spec.satisfies("+skeleton"):
+            self.build_parameters.append({'build_dir': "miniapps/skeleton",
+                                          'target_dirs': ["bin"]})
+        if self.spec.satisfies("+gungho_dev"):
+            self.build_parameters.append({'build_dir': "miniapps/gungho_dev",
+                                          'target_dirs': ["bin"]})
+        if self.spec.satisfies("+lfric_atm"):
+            self.build_parameters.append({'build_dir': "lfric_atm",
+                                          'target_dirs': ["bin"]})
+
+
     def build(self, spec, prefix):
-        with working_dir(self.build_directory):
-            make("build")
+        self.setup_build_parameters()
+        for par in self.build_parameters:
+            with working_dir(par['build_dir']):
+                make("build")
 
     def install(self, spec, prefix):
-        with working_dir(self.build_directory):
-            install_tree("bin/", prefix.bin)
+        for par in self.build_parameters:
+            with working_dir(par['build_dir']):
+                if 'bin' in par['target_dirs']:
+                    install_tree("bin/", prefix.bin)
             
