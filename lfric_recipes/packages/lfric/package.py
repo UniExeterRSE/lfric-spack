@@ -49,6 +49,9 @@ class Lfric(MakefilePackage):
     variant("gungho_dev", default=False, description="Builds the LFRic GungHo development application")
     variant("lfric_atm", default=False, description="Builds the LFRic atmospheric model application")
 
+
+    variant("development", default=True, description="Retains the LFRic build environment to use as a development environment")
+
     # FIXME: Restrict versions
     depends_on("mpi")
     depends_on("hdf5+mpi")
@@ -156,4 +159,6 @@ class Lfric(MakefilePackage):
             with working_dir(par['build_dir']):
                 if 'bin' in par['target_dirs']:
                     install_tree("bin/", prefix.bin)
-            
+                if 'lib' in par['target_dirs']:
+                    install_tree("lib/", prefix.lib)
+
