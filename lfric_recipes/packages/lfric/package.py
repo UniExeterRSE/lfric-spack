@@ -39,6 +39,7 @@ class Lfric(MakefilePackage):
     # maintainers = ["github_user1", "github_user2"]
 
     # FIXME: Add proper versions and checksums here.
+    version("r46497", revision=46497)
     version("r39162", revision=39162)
 
     # Variants corresponding to different LFRic apps
@@ -126,6 +127,7 @@ class Lfric(MakefilePackage):
 
 
     def setup_build_parameters(self):
+        # Create dictionary of build targets based on spec/variants
         self.build_parameters = []
         if self.spec.satisfies("+infrastructure"):
             self.build_parameters.append({'build_dir': "infrastructure",
