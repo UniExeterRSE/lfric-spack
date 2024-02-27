@@ -96,12 +96,12 @@ class Lfric(MakefilePackage):
                              -L{self.spec['xios'].prefix}/lib \
                              -L{self.spec['pfunit'].prefix}/lib")
 
-        env.set("LD_LIBRARY_PATH", f"{self.spec['mpi'].prefix}/lib \
-                                     {self.spec['hdf5'].prefix}/lib \
-                                     {self.spec['netcdf-c'].prefix}/lib \
-                                     {self.spec['netcdf-fortran'].prefix}/lib \
-                                     {self.spec['yaxt'].prefix}/lib \
-                                     {self.spec['xios'].prefix}/lib \
+        env.set("LD_LIBRARY_PATH", f"{self.spec['mpi'].prefix}/lib:\
+                                     {self.spec['hdf5'].prefix}/lib:\
+                                     {self.spec['netcdf-c'].prefix}/lib:\
+                                     {self.spec['netcdf-fortran'].prefix}/lib:\
+                                     {self.spec['yaxt'].prefix}/lib:\
+                                     {self.spec['xios'].prefix}/lib:\
                                      {self.spec['pfunit'].prefix}/lib")
 
         env.set("PSYCLONE_CONFIG", os.path.join(self.spec['py-psyclone'].prefix.share, "psyclone/psyclone.cfg"))
